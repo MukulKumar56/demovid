@@ -52,8 +52,8 @@ app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for flashing messages
 
 # Replace these with your actual credentials
-YOUR_USERNAME = 'your_username'  # Your account username
-YOUR_PASSWORD = 'your_password'    # Your account password
+YOUR_USERNAME = 'qubitvid@gmail.com'  # Your account username
+YOUR_PASSWORD = '.7002@j5UKUm'    # Your account password
 
 # Create a single instance of yt-dlp with your credentials
 ydl_opts = {
