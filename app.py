@@ -10,7 +10,12 @@ def index():
     formats, url = None, None
     if request.method == 'POST':
         url = request.form['url']
-        ydl_opts = {'format': 'bestaudio/best', 'quiet': True, 'noplaylist': True}
+        ydl_opts = {
+            'format': 'bestaudio/best', 
+            'quiet': True, 
+            'noplaylist': True,
+            'cookiefile': '/path/to/cookies.txt'  # Path to your cookies file
+        }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
@@ -25,7 +30,13 @@ def index():
 @app.route('/get_video', methods=['POST'])
 def get_video():
     url, format_id = request.form['url'], request.form['format_id']
-    ydl_opts = {'format': format_id, 'quiet': True, 'noplaylist': True, 'outtmpl': '%(title)s.%(ext)s'}
+    ydl_opts = {
+        'format': format_id, 
+        'quiet': True, 
+        'noplaylist': True, 
+        'outtmpl': '%(title)s.%(ext)s',
+        'cookiefile': '/path/to/cookies.txt'  # Path to your cookies file
+    }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -40,7 +51,6 @@ def get_video():
             flash(f'Error processing video: {e}')
 
     return redirect('/')
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
