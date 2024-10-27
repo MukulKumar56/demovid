@@ -43,15 +43,13 @@
 # if __name__ == '__main__':
 #     app.run(debug=True)
 
+
 import os
-from flask import Flask, render_template, request, redirect, flash, session
+from flask import Flask, render_template, request, redirect, flash
 import yt_dlp
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Needed for flashing messages
-
-# OAuth token storage
-OAUTH_TOKEN = None
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -80,18 +78,6 @@ def index():
 
     return render_template('index.html', formats=formats, url=url)
 
-@app.route('/authorize')
-def authorize():
-    global OAUTH_TOKEN
-    # Start the OAuth flow
-    os.system('yt-dlp --username=oauth --password=""')  # This will prompt for authorization in the terminal
-    # After successful authorization, you should have the token saved in the cache
-    # You can fetch it or set it to a global variable here if needed
-    # For simplicity, we assume the token is saved by yt-dlp
-    OAUTH_TOKEN = 'your_oauth_token'  # Replace with actual token retrieval logic
-    flash('Authorization successful! You can now download videos.')
-    return redirect('/')
-
 @app.route('/get_video', methods=['POST'])
 def get_video():
     url, format_id = request.form['url'], request.form['format_id']
@@ -104,9 +90,7 @@ def get_video():
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'mp3',
             'preferredquality': '192',
-        }],
-        'username': 'oauth',
-        'password': ''  # Leave this empty
+        }]
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -127,4 +111,5 @@ def get_video():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)
+
