@@ -14,7 +14,7 @@ def index():
             'format': 'bestaudio/best', 
             'quiet': True, 
             'noplaylist': True,
-            'cookiefile': '/path/to/cookies.txt'  # Path to your cookies file
+            'cookiefile': 'cookies.txt'  # Path to your cookies file
         }
 
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
