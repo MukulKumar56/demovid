@@ -1,37 +1,91 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Video Downloader</h1>
-        <form action="/" method="POST">
-            <input type="text" name="url" placeholder="Enter video URL" required>
-            <button type="submit">Get Formats</button>
-        </form>
-        {% if formats %}
-            <form action="/get_video" method="POST">
-                <input type="hidden" name="url" value="{{ url }}">
-                <h2>Select Format</h2>
-                <select name="format_id" required>
-                    {% for format in formats %}
-                        <option value="{{ format['format_id'] }}">
-                            {{ format['format_id'] }} - {{ format['ext'] }} - 
-                            {% if format['vcodec'] != 'none' %}
-                                {{ format['height'] }}p
-                            {% else %}
-                                Audio
-                            {% endif %}
-                        </option>
-                    {% endfor %}
-                </select>
-                <button type="submit">Download</button>
-            </form>
-        {% endif %}
-    </div>
+    <h1>Video Downloader</h1>
+    <form id="urlForm">
+        <input type="text" name="url" placeholder="Enter video URL" required>
+        <button type="submit">Get Video Info</button>
+    </form>
+    <div id="processingMessage" style="display: none; color: #555; margin-top: 10px;"></div>
+    <div id="videoInfo"></div>
+    <button id="downloadButton" style="display: none;">Download</button>
+
+    <script>
+        const urlForm = document.getElementById('urlForm');
+        const videoInfoDiv = document.getElementById('videoInfo');
+        const processingMessage = document.getElementById('processingMessage');
+        const downloadButton = document.getElementById('downloadButton');
+
+        urlForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const urlInput = urlForm.elements.url;
+            const url = urlInput.value.trim();
+
+            // Show the processing message
+            processingMessage.textContent = "Please wait for 10 seconds... We are processing...";
+            processingMessage.style.display = 'block';
+
+            try {
+                // Simulate a delay of 10 seconds
+                await new Promise(resolve => setTimeout(resolve, 10000));
+
+                const response = await fetch('/get_video_info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `url=${encodeURIComponent(url)}`,
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // Display video title and thumbnail
+                    videoInfoDiv.innerHTML = `
+                        <h2>${data.title}</h2>
+                        <img src="${data.thumbnail}" alt="Thumbnail" style="max-width: 200px;">
+                        <h3>Available Formats:</h3>
+                        <select id="formatSelect">
+                            <option value="">Select a format</option>
+                            ${data.formats.map(format => `<option value="${format.url}" data-ext="${format.ext}">${format.ext} (${format.resolution || 'No resolution'})</option>`).join('')}
+                        </select>
+                    `;
+
+                    // Show the download button when a format is selected
+                    const formatSelect = document.getElementById('formatSelect');
+                    formatSelect.addEventListener('change', () => {
+                        downloadButton.style.display = formatSelect.value ? 'block' : 'none';
+                    });
+
+                    // Handle download button click
+                    downloadButton.onclick = () => {
+                        const selectedFormat = formatSelect.options[formatSelect.selectedIndex];
+                        const downloadUrl = selectedFormat.value;
+                        const ext = selectedFormat.getAttribute('data-ext');
+
+                        const a = document.createElement('a');
+                        a.href = downloadUrl;
+                        a.download = `video.${ext}`; // Set the filename
+                        document.body.appendChild(a); // Append to body
+                        a.click();
+                        document.body.removeChild(a); // Remove from body
+                    };
+                }
+            } catch (error) {
+                console.error("Error occurred:", error);
+                alert("An error occurred: " + error.message);
+            } finally {
+                // Hide the processing message after the operation
+                processingMessage.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
