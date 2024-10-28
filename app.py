@@ -1,3 +1,4 @@
+import os 
 from flask import Flask, render_template, request, redirect, flash
 import yt_dlp
 
@@ -21,7 +22,10 @@ def index():
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             try:
                 info_dict = ydl.extract_info(url, download=False)
-                formats = [f for f in info_dict.get('formats', []) if f['ext'] in ['mp3', 'mp4', 'opus']]
+                # Filter formats to only include those with valid URLs and specified extensions
+                formats = [f for f in info_dict.get('formats', []) 
+                           if f['ext'] in ['mp3', 'mp4', 'opus'] and f.get('url')]
+
                 print("Available formats:", formats)  # Debugging line
             except Exception as e:
                 flash(f'Error extracting video info: {e}')
@@ -62,4 +66,6 @@ def get_video():
             flash(f'Error processing video: {e}')
             return redirect('/')
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+
+
